@@ -241,8 +241,7 @@ function renderizarChamados() {
         <div class="chamado-texto" style="margin-top:12px;">${esc(chamado.texto)}</div>
         ${obsHtml}
         <div class="chamado-actions" style="margin-top:8px;">
-          <button class="btn-copiar-chamado" onclick="copiarChamado('${chamado.id}', this)">Copiar texto</button>
-          <button class="btn-obs" onclick="abrirModal('${chamado.id}')">${chamado.observacao ? 'Editar observação' : 'Adicionar observação'}</button>
+          <button class="btn-copiar-chamado" id="btn-copiar-${chamado.id}" onclick="copiarChamado('${chamado.id}', document.getElementById('btn-copiar-${chamado.id}'))">Copiar texto</button>          <button class="btn-obs" onclick="abrirModal('${chamado.id}')">${chamado.observacao ? 'Editar observação' : 'Adicionar observação'}</button>
           <button class="btn-excluir" onclick="excluir('${chamado.id}')">Excluir</button>
         </div>
       </div>
