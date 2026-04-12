@@ -289,6 +289,7 @@ function renderizarDashboard() {
   // ── Gráfico de barras: chamados por atendente ──
   const contagemAtendente = {};
   dados.forEach(c => { contagemAtendente[c.atendente || 'N/A'] = (contagemAtendente[c.atendente || 'N/A'] || 0) + 1; });
+  const cores = ['#06B6D4','#F59E0B','#EF4444','#8B5CF6','#EC4899','#14B8A6','#F97316','#6366F1','#84CC16','#34D399'];
   const labelsAt = Object.keys(contagemAtendente).sort((a, b) => contagemAtendente[b] - contagemAtendente[a]);
   const valuesAt = labelsAt.map(l => contagemAtendente[l]);
 
@@ -300,7 +301,7 @@ function renderizarDashboard() {
       datasets: [{
         label: 'Chamados',
         data: valuesAt,
-        backgroundColor: '#10B981',
+       backgroundColor: labelsAt.map((_, i) => cores[i % cores.length]),
         borderRadius: 6,
         borderSkipped: false
       }]
@@ -321,7 +322,6 @@ function renderizarDashboard() {
   dados.forEach(c => { contagemDemanda[c.demanda || 'N/A'] = (contagemDemanda[c.demanda || 'N/A'] || 0) + 1; });
   const labelsDem = Object.keys(contagemDemanda).sort((a, b) => contagemDemanda[b] - contagemDemanda[a]).slice(0, 8);
   const valuesDem = labelsDem.map(l => contagemDemanda[l]);
-  const cores = ['#10B981','#34D399','#6EE7B7','#a898ff','#7c6af7','#fb923c','#f87171','#60a5fa'];
 
   if (grafDemanda) grafDemanda.destroy();
   grafDemanda = new Chart(document.getElementById('grafico-demanda'), {
