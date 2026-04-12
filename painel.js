@@ -369,12 +369,19 @@ function renderizarDashboard() {
       </div>
     `;
   });
-}
+
 // ── Gráfico de linha: chamados por dia por colaborador ──
   const diasMap = {};
-  dados.forEach(c => {
+   dados.forEach(c => {
     if (!c.data) return;
-    const dia = c.data.split(', ')[0];
+    let dia;
+    if (typeof c.data === 'string') {
+      dia = c.data.split(', ')[0];
+    } else if (c.data.toDate) {
+      dia = c.data.toDate().toLocaleDateString('pt-BR');
+    } else {
+      return;
+    }
     const atendente = c.atendente || 'N/A';
     if (!diasMap[dia]) diasMap[dia] = {};
     diasMap[dia][atendente] = (diasMap[dia][atendente] || 0) + 1;
@@ -417,7 +424,7 @@ function renderizarDashboard() {
       }
     }
   });
-
+}
 // ─── Toggle card ──────────────────────────────────────────────────────────────
 function toggleCard(id) {
   const corpo = document.getElementById('corpo-' + id);
