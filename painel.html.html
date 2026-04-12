@@ -164,11 +164,6 @@
             <div class="dash-card-title">Demandas mais abertas</div>
             <div class="dash-chart-wrap">
               <canvas id="grafico-demanda"></canvas>
-              <!-- Linha: chamados por dia por colaborador -->
-          <div class="dash-card dash-wide">
-            <div class="dash-card-title">Chamados por dia — por colaborador</div>
-            <div class="dash-chart-wrap" style="height:300px;">
-              <canvas id="grafico-linha"></canvas>
             </div>
           </div>
 
@@ -178,11 +173,13 @@
             <div id="ranking-lista" class="ranking-lista"></div>
           </div>
 
-        </div>
-      </div>
-
-    </div>
-  </div>
+          <!-- Linha: chamados por dia por colaborador -->
+          <div class="dash-card">
+            <div class="dash-card-title">Chamados por dia — por colaborador</div>
+            <div class="dash-chart-wrap" style="height:300px;">
+              <canvas id="grafico-linha"></canvas>
+            </div>
+          </div>
 
   <!-- MODAL -->
   <div id="modal-obs" class="modal-overlay hidden">
