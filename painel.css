@@ -490,16 +490,124 @@
 
 .hidden { display: none !important; }
 
-.btn-exportar {
-  padding: 8px 16px;
-  border-radius: var(--radius);
-  border: 1px solid var(--accent);
+/* Abas */
+.abas-wrap {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0;
+}
+
+.aba {
+  padding: 10px 24px;
   background: transparent;
-  font-size: 13px;
-  color: var(--accent);
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text3);
   cursor: pointer;
   font-family: var(--sans);
   transition: all 0.15s;
+  margin-bottom: -1px;
 }
 
-.btn-exportar:hover { background: var(--accent-bg); }
+.aba:hover { color: var(--text2); }
+.aba.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Dashboard */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .dash-grid { grid-template-columns: 1fr; }
+}
+
+.dash-wide {
+  grid-column: 1 / -1;
+}
+
+.dash-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+}
+
+.dash-card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  letter-spacing: 0.04em;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.dash-chart-wrap {
+  position: relative;
+  height: 260px;
+}
+
+/* Ranking */
+.ranking-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ranking-pos {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text3);
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ranking-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ranking-nome {
+  font-size: 13px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.ranking-bar-wrap {
+  height: 4px;
+  background: var(--surface2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.ranking-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.ranking-qtd {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  flex-shrink: 0;
+  min-width: 24px;
+  text-align: right;
+}
