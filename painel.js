@@ -7,6 +7,7 @@ let modalChamadoId = null;
 let periodoDash    = 'mes';
 let grafAtendente  = null;
 let grafDemanda    = null;
+let setorDash = 'todos';
 
 // ─── Relógio ──────────────────────────────────────────────────────────────────
 function iniciarRelogio() {
@@ -258,6 +259,13 @@ function filtrarDash(periodo, btn) {
   renderizarDashboard();
 }
 
+function filtrarSetorDash(setor, btn) {
+  setorDash = setor;
+  document.querySelectorAll('#filtro-setor-dash .chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderizarDashboard();
+}
+
 function getChamadosFiltradosDash() {
   const hoje = new Date();
   const inicioSemana = new Date(hoje); inicioSemana.setDate(hoje.getDate() - hoje.getDay());
@@ -268,9 +276,11 @@ function getChamadosFiltradosDash() {
     const [d, m, y] = date.split('/');
     return new Date(`${y}-${m}-${d}T${time || '00:00:00'}`);
   };
-  if (periodoDash === 'semana') return chamados.filter(c => { const d = parsarData(c.data); return d && d >= inicioSemana; });
-  if (periodoDash === 'mes')    return chamados.filter(c => { const d = parsarData(c.data); return d && d >= inicioMes; });
-  return chamados;
+  let resultado = chamados;
+  if (periodoDash === 'semana') resultado = resultado.filter(c => { const d = parsarData(c.data); return d && d >= inicioSemana; });
+  if (periodoDash === 'mes')    resultado = resultado.filter(c => { const d = parsarData(c.data); return d && d >= inicioMes; });
+  if (setorDash !== 'todos')    resultado = resultado.filter(c => c.setor === setorDash);
+  return resultado;
 }
 
 function renderizarDashboard() {
