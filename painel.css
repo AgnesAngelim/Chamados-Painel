@@ -93,7 +93,7 @@
 
 .btn-limpar:hover { background: #450a0a; }
 
-btn-exportar {
+.btn-exportar {
   padding: 8px 16px;
   border-radius: var(--radius);
   border: 1px solid #064E3B;
