@@ -370,6 +370,53 @@ function renderizarDashboard() {
     `;
   });
 }
+// ── Gráfico de linha: chamados por dia por colaborador ──
+  const diasMap = {};
+  dados.forEach(c => {
+    if (!c.data) return;
+    const dia = c.data.split(', ')[0];
+    const atendente = c.atendente || 'N/A';
+    if (!diasMap[dia]) diasMap[dia] = {};
+    diasMap[dia][atendente] = (diasMap[dia][atendente] || 0) + 1;
+  });
+
+  const diasOrdenados = Object.keys(diasMap).sort((a, b) => {
+    const [da, ma, ya] = a.split('/'); const [db, mb, yb] = b.split('/');
+    return new Date(`${ya}-${ma}-${da}`) - new Date(`${yb}-${mb}-${db}`);
+  });
+
+  const atendentesLinha = [...new Set(dados.map(c => c.atendente || 'N/A'))];
+
+  const datasetsLinha = atendentesLinha.map((nome, i) => ({
+    label: nome,
+    data: diasOrdenados.map(dia => diasMap[dia]?.[nome] || 0),
+    borderColor: cores[i % cores.length],
+    backgroundColor: cores[i % cores.length] + '22',
+    borderWidth: 2,
+    pointRadius: 4,
+    tension: 0.3,
+    fill: false
+  }));
+
+  if (grafLinha) grafLinha.destroy();
+  grafLinha = new Chart(document.getElementById('grafico-linha'), {
+    type: 'line',
+    data: { labels: diasOrdenados, datasets: datasetsLinha },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#94A3B8', font: { size: 11 }, padding: 12 }
+        }
+      },
+      scales: {
+        x: { ticks: { color: '#94A3B8' }, grid: { color: '#1e293b' } },
+        y: { ticks: { color: '#94A3B8', stepSize: 1 }, grid: { color: '#1e293b' }, beginAtZero: true }
+      }
+    }
+  });
 
 // ─── Toggle card ──────────────────────────────────────────────────────────────
 function toggleCard(id) {
