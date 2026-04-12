@@ -4,6 +4,9 @@ let filtroAtendente = null;
 let filtroData     = 'todos';
 let ordemAtual     = 'data_desc';
 let modalChamadoId = null;
+let periodoDash    = 'mes';
+let grafAtendente  = null;
+let grafDemanda    = null;
 
 // ─── Relógio ──────────────────────────────────────────────────────────────────
 function iniciarRelogio() {
@@ -20,7 +23,6 @@ function alternarTema() {
   const html = document.documentElement;
   const btn  = document.getElementById('btn-tema');
   const temaAtual = html.getAttribute('data-tema');
-
   if (temaAtual === 'escuro') {
     html.setAttribute('data-tema', 'claro');
     btn.textContent = '🌑';
@@ -49,6 +51,7 @@ function alternarTema() {
     document.body.style.color = '#FFFFFF';
   }
 }
+
 // ─── Login ────────────────────────────────────────────────────────────────────
 function entrar() {
   const senha = document.getElementById('input-senha').value;
@@ -66,6 +69,15 @@ function entrar() {
 
 function sair() { location.reload(); }
 
+// ─── Abas ─────────────────────────────────────────────────────────────────────
+function trocarAba(aba) {
+  document.getElementById('tela-chamados').classList.toggle('hidden', aba !== 'chamados');
+  document.getElementById('tela-dashboard').classList.toggle('hidden', aba !== 'dashboard');
+  document.getElementById('aba-chamados').classList.toggle('active', aba === 'chamados');
+  document.getElementById('aba-dashboard').classList.toggle('active', aba === 'dashboard');
+  if (aba === 'dashboard') renderizarDashboard();
+}
+
 // ─── Firebase ─────────────────────────────────────────────────────────────────
 function iniciarPainel() {
   db.collection('chamados')
@@ -82,19 +94,14 @@ function iniciarPainel() {
 function atualizarStats() {
   const hoje  = new Date();
   const dHoje = hoje.toLocaleDateString('pt-BR');
-
-  const inicioSemana = new Date(hoje);
-  inicioSemana.setDate(hoje.getDate() - hoje.getDay());
-
+  const inicioSemana = new Date(hoje); inicioSemana.setDate(hoje.getDate() - hoje.getDay());
   const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-
   const parsarData = str => {
     if (!str) return null;
     const [date, time] = str.split(', ');
     const [d, m, y] = date.split('/');
     return new Date(`${y}-${m}-${d}T${time || '00:00:00'}`);
   };
-
   document.getElementById('stat-total').textContent  = chamados.length;
   document.getElementById('stat-hoje').textContent   = chamados.filter(c => c.data && c.data.startsWith(dHoje)).length;
   document.getElementById('stat-semana').textContent = chamados.filter(c => { const d = parsarData(c.data); return d && d >= inicioSemana; }).length;
@@ -108,9 +115,9 @@ function tempoRelativo(str) {
   const [d, m, y] = date.split('/');
   const data = new Date(`${y}-${m}-${d}T${time || '00:00:00'}`);
   const diff = Math.floor((new Date() - data) / 1000);
-  if (diff < 60)    return 'agora mesmo';
-  if (diff < 3600)  return `há ${Math.floor(diff/60)} min`;
-  if (diff < 86400) return `há ${Math.floor(diff/3600)} h`;
+  if (diff < 60)     return 'agora mesmo';
+  if (diff < 3600)   return `há ${Math.floor(diff/60)} min`;
+  if (diff < 86400)  return `há ${Math.floor(diff/3600)} h`;
   if (diff < 604800) return `há ${Math.floor(diff/86400)} dia${Math.floor(diff/86400) > 1 ? 's' : ''}`;
   return str;
 }
@@ -180,7 +187,6 @@ function renderizarChamados() {
   };
 
   const busca = (document.getElementById('busca-input')?.value || '').toLowerCase().trim();
-
   let filtrados = [...chamados];
 
   if (filtroSetor !== 'todos') filtrados = filtrados.filter(c => c.setor === filtroSetor);
@@ -188,14 +194,11 @@ function renderizarChamados() {
   if (filtroData === 'hoje')   filtrados = filtrados.filter(c => c.data && c.data.startsWith(dHoje));
   if (filtroData === 'semana') filtrados = filtrados.filter(c => { const d = parsarData(c.data); return d && d >= inicioSemana; });
   if (filtroData === 'mes')    filtrados = filtrados.filter(c => { const d = parsarData(c.data); return d && d >= inicioMes; });
-
-  if (busca) {
-    filtrados = filtrados.filter(c =>
-      (c.atendente || '').toLowerCase().includes(busca) ||
-      (c.demanda   || '').toLowerCase().includes(busca) ||
-      (c.texto     || '').toLowerCase().includes(busca)
-    );
-  }
+  if (busca) filtrados = filtrados.filter(c =>
+    (c.atendente || '').toLowerCase().includes(busca) ||
+    (c.demanda   || '').toLowerCase().includes(busca) ||
+    (c.texto     || '').toLowerCase().includes(busca)
+  );
 
   filtrados.sort((a, b) => {
     if (ordemAtual === 'data_desc') return (parsarData(b.data) || 0) - (parsarData(a.data) || 0);
@@ -219,7 +222,6 @@ function renderizarChamados() {
     const obsHtml = chamado.observacao
       ? `<div class="chamado-obs"><div class="chamado-obs-label">Observação</div>${esc(chamado.observacao)}</div>`
       : '';
-
     card.innerHTML = `
       <div class="chamado-top" onclick="toggleCard('${chamado.id}')" style="cursor:pointer; margin-bottom:0;">
         <div class="chamado-info">
@@ -248,11 +250,113 @@ function renderizarChamados() {
   });
 }
 
-// ─── Extrair ID do cliente do texto ──────────────────────────────────────────
-function extrairId(texto) {
-  if (!texto) return null;
-  const match = texto.match(/ID cliente[:\s]+(\d+)/i);
-  return match ? match[1] : null;
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+function filtrarDash(periodo, btn) {
+  periodoDash = periodo;
+  document.querySelectorAll('#tela-dashboard .chip-data').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderizarDashboard();
+}
+
+function getChamadosFiltradosDash() {
+  const hoje = new Date();
+  const inicioSemana = new Date(hoje); inicioSemana.setDate(hoje.getDate() - hoje.getDay());
+  const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  const parsarData = str => {
+    if (!str) return null;
+    const [date, time] = str.split(', ');
+    const [d, m, y] = date.split('/');
+    return new Date(`${y}-${m}-${d}T${time || '00:00:00'}`);
+  };
+  if (periodoDash === 'semana') return chamados.filter(c => { const d = parsarData(c.data); return d && d >= inicioSemana; });
+  if (periodoDash === 'mes')    return chamados.filter(c => { const d = parsarData(c.data); return d && d >= inicioMes; });
+  return chamados;
+}
+
+function renderizarDashboard() {
+  const dados = getChamadosFiltradosDash();
+
+  // ── Gráfico de barras: chamados por atendente ──
+  const contagemAtendente = {};
+  dados.forEach(c => { contagemAtendente[c.atendente || 'N/A'] = (contagemAtendente[c.atendente || 'N/A'] || 0) + 1; });
+  const labelsAt = Object.keys(contagemAtendente).sort((a, b) => contagemAtendente[b] - contagemAtendente[a]);
+  const valuesAt = labelsAt.map(l => contagemAtendente[l]);
+
+  if (grafAtendente) grafAtendente.destroy();
+  grafAtendente = new Chart(document.getElementById('grafico-atendente'), {
+    type: 'bar',
+    data: {
+      labels: labelsAt,
+      datasets: [{
+        label: 'Chamados',
+        data: valuesAt,
+        backgroundColor: '#10B981',
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#94A3B8' }, grid: { color: '#1e293b' } },
+        y: { ticks: { color: '#94A3B8', stepSize: 1 }, grid: { color: '#1e293b' }, beginAtZero: true }
+      }
+    }
+  });
+
+  // ── Gráfico de pizza: demandas mais abertas ──
+  const contagemDemanda = {};
+  dados.forEach(c => { contagemDemanda[c.demanda || 'N/A'] = (contagemDemanda[c.demanda || 'N/A'] || 0) + 1; });
+  const labelsDem = Object.keys(contagemDemanda).sort((a, b) => contagemDemanda[b] - contagemDemanda[a]).slice(0, 8);
+  const valuesDem = labelsDem.map(l => contagemDemanda[l]);
+  const cores = ['#10B981','#34D399','#6EE7B7','#a898ff','#7c6af7','#fb923c','#f87171','#60a5fa'];
+
+  if (grafDemanda) grafDemanda.destroy();
+  grafDemanda = new Chart(document.getElementById('grafico-demanda'), {
+    type: 'doughnut',
+    data: {
+      labels: labelsDem,
+      datasets: [{
+        data: valuesDem,
+        backgroundColor: cores,
+        borderWidth: 2,
+        borderColor: '#020617'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#94A3B8', font: { size: 11 }, padding: 12 }
+        }
+      }
+    }
+  });
+
+  // ── Ranking ──
+  const ranking = document.getElementById('ranking-lista');
+  ranking.innerHTML = '';
+  const sorted = Object.entries(contagemAtendente).sort((a, b) => b[1] - a[1]);
+  const max = sorted[0]?.[1] || 1;
+  sorted.forEach(([nome, qtd], i) => {
+    const pct = Math.round((qtd / max) * 100);
+    ranking.innerHTML += `
+      <div class="ranking-item">
+        <div class="ranking-pos">${i + 1}</div>
+        <div class="ranking-info">
+          <div class="ranking-nome">${esc(nome)}</div>
+          <div class="ranking-bar-wrap">
+            <div class="ranking-bar" style="width:${pct}%"></div>
+          </div>
+        </div>
+        <div class="ranking-qtd">${qtd}</div>
+      </div>
+    `;
+  });
 }
 
 // ─── Toggle card ──────────────────────────────────────────────────────────────
@@ -264,7 +368,7 @@ function toggleCard(id) {
   seta.textContent = aberto ? '▸' : '▾';
 }
 
-// ─── Copiar texto ─────────────────────────────────────────────────────────────
+// ─── Copiar ───────────────────────────────────────────────────────────────────
 function copiarChamado(id, btn) {
   const chamado = chamados.find(c => c.id === id);
   if (!chamado) return;
@@ -329,29 +433,14 @@ function confirmarLimpar() {
   }).catch(err => console.error('Erro ao limpar:', err));
 }
 
-// ─── Utilitário ───────────────────────────────────────────────────────────────
-function esc(str) {
-  return String(str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
+// ─── Exportar CSV ─────────────────────────────────────────────────────────────
 function exportarCSV() {
   if (chamados.length === 0) { alert('Nenhum chamado para exportar.'); return; }
-
   const cabecalho = ['Data', 'Setor', 'Atendente', 'Demanda', 'Subtipo', 'ID Cliente', 'Observação'];
-
   const linhas = chamados.map(c => [
-    c.data || '',
-    c.setor || '',
-    c.atendente || '',
-    c.demanda || '',
-    c.subtipo || '',
-    extrairId(c.texto) || '',
-    c.observacao || ''
+    c.data || '', c.setor || '', c.atendente || '', c.demanda || '',
+    c.subtipo || '', extrairId(c.texto) || '', c.observacao || ''
   ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'));
-
   const csv = [cabecalho.join(';'), ...linhas].join('\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
@@ -360,4 +449,19 @@ function exportarCSV() {
   a.download = `chamados_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// ─── Utilitários ──────────────────────────────────────────────────────────────
+function extrairId(texto) {
+  if (!texto) return null;
+  const match = texto.match(/ID cliente[:\s]+(\d+)/i);
+  return match ? match[1] : null;
+}
+
+function esc(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
