@@ -263,6 +263,7 @@ function filtrarSetorDash(setor, btn) {
   setorDash = setor;
   document.querySelectorAll('#filtro-setor-dash .chip').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+    document.getElementById('filtro-periodo-dash').style.display = 'flex';
   renderizarDashboard();
 }
 
