@@ -8,6 +8,8 @@ let periodoDash    = 'mes';
 let grafAtendente  = null;
 let grafDemanda    = null;
 let setorDash = 'todos';
+let grafLinha = null;
+
 
 // ─── Relógio ──────────────────────────────────────────────────────────────────
 function iniciarRelogio() {
