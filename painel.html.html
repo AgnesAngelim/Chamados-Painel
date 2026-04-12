@@ -52,71 +52,122 @@
         </div>
       </div>
 
-      <!-- BUSCA -->
-      <div class="busca-wrap">
-        <input type="text" class="busca-input" id="busca-input" placeholder="Buscar por ID do cliente, atendente ou demanda..." oninput="renderizarChamados()" />
+      <!-- ABAS -->
+      <div class="abas-wrap">
+        <button class="aba active" id="aba-chamados" onclick="trocarAba('chamados')">Chamados</button>
+        <button class="aba" id="aba-dashboard" onclick="trocarAba('dashboard')">Dashboard</button>
       </div>
 
-      <!-- STATS -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">Total</div>
-          <div class="stat-value" id="stat-total">0</div>
+      <!-- ========== ABA CHAMADOS ========== -->
+      <div id="tela-chamados">
+
+        <!-- BUSCA -->
+        <div class="busca-wrap">
+          <input type="text" class="busca-input" id="busca-input" placeholder="Buscar por ID do cliente, atendente ou demanda..." oninput="renderizarChamados()" />
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Hoje</div>
-          <div class="stat-value accent" id="stat-hoje">0</div>
+
+        <!-- STATS -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total</div>
+            <div class="stat-value" id="stat-total">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Hoje</div>
+            <div class="stat-value accent" id="stat-hoje">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Esta semana</div>
+            <div class="stat-value" id="stat-semana">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Este mês</div>
+            <div class="stat-value" id="stat-mes">0</div>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Esta semana</div>
-          <div class="stat-value" id="stat-semana">0</div>
+
+        <!-- SETOR -->
+        <div class="filtros-row" style="margin-bottom:12px;">
+          <div class="chip-group">
+            <button class="chip active" onclick="filtrar('todos', this)">Todos</button>
+            <button class="chip" onclick="filtrar('green', this)">Green</button>
+            <button class="chip" onclick="filtrar('telecom', this)">Telecom</button>
+            <button class="chip" onclick="filtrar('expansao', this)">Expansão</button>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Este mês</div>
-          <div class="stat-value" id="stat-mes">0</div>
+
+        <!-- COLABORADORES -->
+        <div class="colaboradores-wrap" id="colaboradores-wrap" style="display:none; margin-bottom:12px;">
+          <div id="lista-colaboradores" class="colaboradores-list"></div>
         </div>
+
+        <!-- DATA E ORDEM -->
+        <div class="filtros-row">
+          <div class="chip-group">
+            <button class="chip-data active" onclick="filtrarData('todos', this)">Todos</button>
+            <button class="chip-data" onclick="filtrarData('hoje', this)">Hoje</button>
+            <button class="chip-data" onclick="filtrarData('semana', this)">Esta semana</button>
+            <button class="chip-data" onclick="filtrarData('mes', this)">Este mês</button>
+          </div>
+          <select class="select-ordem" onchange="ordenar(this.value)">
+            <option value="data_desc">Mais recentes</option>
+            <option value="data_asc">Mais antigos</option>
+            <option value="atendente">Atendente A-Z</option>
+            <option value="setor">Setor A-Z</option>
+          </select>
+        </div>
+
+        <!-- CONTADOR -->
+        <div id="contador" class="contador"></div>
+
+        <!-- LISTA -->
+        <div id="lista-chamados"></div>
+
+        <!-- VAZIO -->
+        <div id="vazio" class="vazio hidden">
+          <p>Nenhum chamado encontrado.</p>
+        </div>
+
       </div>
 
-      <!-- SETOR -->
-      <div class="filtros-row" style="margin-bottom:12px;">
-        <div class="chip-group">
-          <button class="chip active" onclick="filtrar('todos', this)">Todos</button>
-          <button class="chip" onclick="filtrar('green', this)">Green</button>
-          <button class="chip" onclick="filtrar('telecom', this)">Telecom</button>
-          <button class="chip" onclick="filtrar('expansao', this)">Expansão</button>
+      <!-- ========== ABA DASHBOARD ========== -->
+      <div id="tela-dashboard" class="hidden">
+
+        <!-- FILTRO PERÍODO DASHBOARD -->
+        <div class="filtros-row" style="margin-bottom:24px;">
+          <div class="chip-group">
+            <button class="chip-data active" onclick="filtrarDash('mes', this)">Este mês</button>
+            <button class="chip-data" onclick="filtrarDash('semana', this)">Esta semana</button>
+            <button class="chip-data" onclick="filtrarDash('todos', this)">Todos</button>
+          </div>
         </div>
-      </div>
 
-      <!-- COLABORADORES -->
-      <div class="colaboradores-wrap" id="colaboradores-wrap" style="display:none; margin-bottom:12px;">
-        <div id="lista-colaboradores" class="colaboradores-list"></div>
-      </div>
+        <!-- GRÁFICOS -->
+        <div class="dash-grid">
 
-      <!-- DATA E ORDEM -->
-      <div class="filtros-row">
-        <div class="chip-group">
-          <button class="chip-data active" onclick="filtrarData('todos', this)">Todos</button>
-          <button class="chip-data" onclick="filtrarData('hoje', this)">Hoje</button>
-          <button class="chip-data" onclick="filtrarData('semana', this)">Esta semana</button>
-          <button class="chip-data" onclick="filtrarData('mes', this)">Este mês</button>
+          <!-- Barras: chamados por atendente -->
+          <div class="dash-card dash-wide">
+            <div class="dash-card-title">Chamados por atendente</div>
+            <div class="dash-chart-wrap">
+              <canvas id="grafico-atendente"></canvas>
+            </div>
+          </div>
+
+          <!-- Pizza: demandas mais abertas -->
+          <div class="dash-card">
+            <div class="dash-card-title">Demandas mais abertas</div>
+            <div class="dash-chart-wrap">
+              <canvas id="grafico-demanda"></canvas>
+            </div>
+          </div>
+
+          <!-- Ranking -->
+          <div class="dash-card">
+            <div class="dash-card-title">Ranking de atendentes</div>
+            <div id="ranking-lista" class="ranking-lista"></div>
+          </div>
+
         </div>
-        <select class="select-ordem" onchange="ordenar(this.value)">
-          <option value="data_desc">Mais recentes</option>
-          <option value="data_asc">Mais antigos</option>
-          <option value="atendente">Atendente A-Z</option>
-          <option value="setor">Setor A-Z</option>
-        </select>
-      </div>
-
-      <!-- CONTADOR -->
-      <div id="contador" class="contador"></div>
-
-      <!-- LISTA -->
-      <div id="lista-chamados"></div>
-
-      <!-- VAZIO -->
-      <div id="vazio" class="vazio hidden">
-        <p>Nenhum chamado encontrado.</p>
       </div>
 
     </div>
@@ -152,6 +203,10 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
   </script>
+
+  <!-- CHART.JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
   <script src="painel.js"></script>
 </body>
 </html>
