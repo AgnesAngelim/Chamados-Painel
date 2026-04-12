@@ -337,3 +337,27 @@ function esc(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+function exportarCSV() {
+  if (chamados.length === 0) { alert('Nenhum chamado para exportar.'); return; }
+
+  const cabecalho = ['Data', 'Setor', 'Atendente', 'Demanda', 'Subtipo', 'ID Cliente', 'Observação'];
+
+  const linhas = chamados.map(c => [
+    c.data || '',
+    c.setor || '',
+    c.atendente || '',
+    c.demanda || '',
+    c.subtipo || '',
+    extrairId(c.texto) || '',
+    c.observacao || ''
+  ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(';'));
+
+  const csv = [cabecalho.join(';'), ...linhas].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `chamados_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
