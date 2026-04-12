@@ -93,6 +93,19 @@
 
 .btn-limpar:hover { background: #450a0a; }
 
+btn-exportar {
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  border: 1px solid #064E3B;
+  background: transparent;
+  font-size: 13px;
+  color: #34D399;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: all 0.15s;
+}
+.btn-exportar:hover { background: #064E3B; color: #d1fae5; }  
+
 /* Busca */
 .busca-wrap {
   margin-bottom: 24px;
