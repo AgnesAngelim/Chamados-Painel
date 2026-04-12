@@ -507,7 +507,6 @@ function mostrarDemandas() {
   document.getElementById('passo2').classList.remove('hidden');
 }
 
-// =========================
 // SELECIONAR DEMANDA
 // =========================
 function selecionarDemanda(d, btn) {
@@ -631,5 +630,28 @@ function gerarTexto() {
 // =========================
 function copiar() {
   const texto = document.getElementById('output-text').textContent;
-  navigator.clipboard.writeText(texto);
+  const btn = document.getElementById('btn-copy');
+
+  function onCopiado() {
+    btn.textContent = 'Copiado!';
+    btn.style.borderColor = 'var(--accent)';
+    btn.style.color = 'var(--accent)';
+    setTimeout(() => {
+      btn.textContent = 'Copiar texto';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 2000);
+  }
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(texto).then(onCopiado);
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); onCopiado(); } catch(e) {}
+    document.body.removeChild(ta);
+  }
 }
