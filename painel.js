@@ -241,7 +241,7 @@ function renderizarChamados() {
         <div class="chamado-texto" style="margin-top:12px;">${esc(chamado.texto)}</div>
         ${obsHtml}
         <div class="chamado-actions" style="margin-top:8px;">
-          <button class="btn-copiar-chamado" id="btn-copiar-${chamado.id}" onclick="copiarChamado('${chamado.id}', document.getElementById('btn-copiar-${chamado.id}'))">Copiar texto</button>          <button class="btn-obs" onclick="abrirModal('${chamado.id}')">${chamado.observacao ? 'Editar observação' : 'Adicionar observação'}</button>
+         <button class="btn-copiar-chamado" id="btn-copiar-${chamado.id}" onclick="copiarChamado('${chamado.id}')">Copiar texto</button>
           <button class="btn-excluir" onclick="excluir('${chamado.id}')">Excluir</button>
         </div>
       </div>
@@ -379,15 +379,25 @@ function toggleCard(id) {
 }
 
 // ─── Copiar ───────────────────────────────────────────────────────────────────
-function copiarChamado(id, btn) {
+function copiarChamado(id) {
   const chamado = chamados.find(c => c.id === id);
   if (!chamado) return;
+
+  const btn = document.getElementById('btn-copiar-' + id);
+
   function onCopiado() {
-    btn.textContent = 'Copiado!';
-    btn.style.borderColor = 'var(--accent)';
-    btn.style.color = 'var(--accent)';
-    setTimeout(() => { btn.textContent = 'Copiar texto'; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
+    if (btn) {
+      btn.textContent = 'Copiado!';
+      btn.style.borderColor = 'var(--accent)';
+      btn.style.color = 'var(--accent)';
+      setTimeout(() => {
+        btn.textContent = 'Copiar texto';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }, 2000);
+    }
   }
+
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(chamado.texto).then(onCopiado);
   } else {
