@@ -133,15 +133,21 @@
       <!-- ========== ABA DASHBOARD ========== -->
       <div id="tela-dashboard" class="hidden">
 
-        <!-- FILTRO PERÍODO DASHBOARD -->
+        <!-- FILTRO PERÍODO E SETOR DASHBOARD -->
         <div class="filtros-row" style="margin-bottom:24px;">
           <div class="chip-group">
             <button class="chip-data active" onclick="filtrarDash('mes', this)">Este mês</button>
             <button class="chip-data" onclick="filtrarDash('semana', this)">Esta semana</button>
             <button class="chip-data" onclick="filtrarDash('todos', this)">Todos</button>
           </div>
+          <div class="chip-group" id="filtro-setor-dash">
+            <button class="chip active" onclick="filtrarSetorDash('todos', this)">Todos</button>
+            <button class="chip" onclick="filtrarSetorDash('green', this)">Green</button>
+            <button class="chip" onclick="filtrarSetorDash('telecom', this)">Telecom</button>
+            <button class="chip" onclick="filtrarSetorDash('expansao', this)">Expansão</button>
+          </div>
         </div>
-
+        
         <!-- GRÁFICOS -->
         <div class="dash-grid">
 
