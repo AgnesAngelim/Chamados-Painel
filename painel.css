@@ -96,15 +96,15 @@
 .btn-exportar {
   padding: 8px 16px;
   border-radius: var(--radius);
-  border: 1px solid #064E3B;
+  border: 1px solid var(--border2);
   background: transparent;
   font-size: 13px;
-  color: #34D399;
+  color: var(--text2);
   cursor: pointer;
   font-family: var(--sans);
   transition: all 0.15s;
 }
-.btn-exportar:hover { background: #064E3B; color: #d1fae5; }  
+.btn-exportar:hover { background: var(--surface2); color: var(--text); }
 
 /* Busca */
 .busca-wrap {
