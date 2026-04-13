@@ -16,21 +16,10 @@ if (!firebase.apps.length) {
 }
 const db = firebase.firestore();
 
-// =========================
-//  FUNÇÃO DE SALVAR 
-// =========================
-function salvarChamado(chamado) {
-  db.collection('chamados').add({
-    ...chamado,
-    data: firebase.firestore.FieldValue.serverTimestamp()
-  })
-  .then(() => console.log('Enviado ao Painel'))
-  .catch(err => alert('Erro ao enviar: ' + err.message));
-}
 const atendentes = {
   green: ["Kamilla", "Guilherme"],
   telecom: ["Ana Carolina", "Alana Campos", "Daniel Henrique", "Maria Julia", "Renan Gonçalves"],
-  expansao: ["Pedro Lucas", "Ibson Pereira", "Suyara", "Raissa"]
+  expansao: ["Pedro Lucas", "Ibson Pereira", "Mateus Keveny", "Raissa"]
 };
 
 let atendenteAtual = '';
@@ -387,14 +376,17 @@ const demandas = {
   ],
   expansao: [
     {
-      nome: "Recorrencia imediata",
+      nome: "Transferência de convites Expert 4.0",
       subs: [
         {
-          sub: "Ativação de recorrência",
+          sub: "Transferência de convites Expert 4.0",
           partes: [
-            {
-              t: "O licenciado solicita a ativação de recorrência imediata no sistema. A cobrança recorrente não foi iniciada conforme configurado no momento da contratação.",
-            },
+            { t: "Licenciado " },
+            { f: "licenciado_origem", ph: "Ex: 12345 - nome" },
+            { t: " deseja realizar transferência de " },
+            { f: "qtd_convites", ph: "ex: 1" },
+            { t: " convite(s) para o licenciado " },
+            { f: "licenciado_destino", ph: "ex: 67890 - nome" },
           ],
           extras: [],
         },
@@ -443,7 +435,7 @@ const demandas = {
       ],
     },
   ],
-}; 
+};
 
 // =========================
 // SALVAR NO FIREBASE
@@ -486,13 +478,13 @@ function selecionarSetor(setor, btn) {
   document.getElementById('passo-atendente').classList.remove('hidden');
 }
 
+// =========================
 // MOSTRAR DEMANDAS
 // =========================
 function mostrarDemandas() {
   const lista = document.getElementById('demanda-list');
   lista.innerHTML = '';
 
-  // ESCONDE o que estiver abaixo para começar do zero
   document.getElementById('passo3').classList.add('hidden');
   document.getElementById('output-box').style.display = 'none';
 
@@ -507,6 +499,7 @@ function mostrarDemandas() {
   document.getElementById('passo2').classList.remove('hidden');
 }
 
+// =========================
 // SELECIONAR DEMANDA
 // =========================
 function selecionarDemanda(d, btn) {
@@ -517,10 +510,15 @@ function selecionarDemanda(d, btn) {
 
   document.getElementById('output-box').style.display = 'none';
   document.getElementById('passo4').classList.add('hidden');
-   document.getElementById('id-cliente').value = '';        
-  document.getElementById('id-licenciado').value = '';    
-  idClienteSalvo = '';                                     
-  idLicenciadoSalvo = '';    
+  document.getElementById('id-cliente').value = '';
+  document.getElementById('id-licenciado').value = '';
+  idClienteSalvo = '';
+  idLicenciadoSalvo = '';
+
+  // Esconde/mostra o campo ID cliente e ajusta o label conforme a demanda
+  const isTransferencia = d.nome === "Transferência de convites Expert 4.0";
+  const campoClienteWrap = document.getElementById('id-cliente').closest('.field-group');
+  campoClienteWrap.style.display = isTransferencia ? 'none' : '';
 
   const lista = document.getElementById('sub-list');
   lista.innerHTML = '';
@@ -529,13 +527,14 @@ function selecionarDemanda(d, btn) {
     const b = document.createElement('button');
     b.className = 'sub-item';
     b.textContent = s.sub;
-    b.onclick = () => selecionarSub(s, b); // Só aqui vai para o próximo passo
+    b.onclick = () => selecionarSub(s, b);
     lista.appendChild(b);
   });
 
-  // MOSTRA apenas os sub-títulos (passo 3)
   document.getElementById('passo3').classList.remove('hidden');
 }
+
+// =========================
 //  SELECIONAR SUB
 // =========================
 function selecionarSub(s, btn) {
@@ -546,7 +545,7 @@ function selecionarSub(s, btn) {
 
   document.getElementById('titulo-box').textContent = demandaAtual.nome;
   document.getElementById('subtitulo-box').textContent = s.sub;
-  
+
   const wrap = document.getElementById('modelo-wrap');
   wrap.innerHTML = '';
   s.partes.forEach(p => {
@@ -573,15 +572,17 @@ function selecionarSub(s, btn) {
   document.getElementById('id-cliente').value    = idClienteSalvo;
   document.getElementById('id-licenciado').value = idLicenciadoSalvo;
 }
+
 // =========================
 // GERAR TEXTO + ENVIAR
 // =========================
 function gerarTexto() {
   if (!subAtual) return;
 
-  const idCliente = document.getElementById('id-cliente').value.trim();
+  const isTransferencia = demandaAtual.nome === "Transferência de convites Expert 4.0";
+  const idCliente    = document.getElementById('id-cliente').value.trim();
   const idLicenciado = document.getElementById('id-licenciado').value.trim();
-  idClienteSalvo = idCliente;
+  idClienteSalvo    = idCliente;
   idLicenciadoSalvo = idLicenciado;
 
   if (!atendenteAtual) {
@@ -589,13 +590,17 @@ function gerarTexto() {
     return;
   }
 
-  if (!idCliente || !idLicenciado) {
+  if (isTransferencia && !idLicenciado) {
+    alert('Preencha o ID licenciado');
+    return;
+  }
+
+  if (!isTransferencia && (!idCliente || !idLicenciado)) {
     alert('Preencha os IDs');
     return;
   }
 
   let modelo = '';
-
   subAtual.partes.forEach(p => {
     if (p.t) modelo += p.t;
     else if (p.f) {
@@ -604,28 +609,37 @@ function gerarTexto() {
     }
   });
 
-  let texto = `${demandaAtual.nome} - ID cliente: ${idCliente}\n`;
-  texto += `Atendente: ${atendenteAtual}\n`;
-  texto += `Corrigir: ${subAtual.sub}\n`;
-  texto += `${modelo}\n`;
-  texto += `ID cliente: ${idCliente}\n`;
-  texto += `ID licenciado: ${idLicenciado}`;
+  let texto;
+  if (isTransferencia) {
+    texto  = `${demandaAtual.nome} - ID licenciado: ${idLicenciado}\n`;
+    texto += `Atendente: ${atendenteAtual}\n`;
+    texto += `Corrigir: ${subAtual.sub}\n`;
+    texto += `${modelo}\n`;
+    texto += `ID licenciado: ${idLicenciado}`;
+  } else {
+    texto  = `${demandaAtual.nome} - ID cliente: ${idCliente}\n`;
+    texto += `Atendente: ${atendenteAtual}\n`;
+    texto += `Corrigir: ${subAtual.sub}\n`;
+    texto += `${modelo}\n`;
+    texto += `ID cliente: ${idCliente}\n`;
+    texto += `ID licenciado: ${idLicenciado}`;
+  }
 
   document.getElementById('output-text').textContent = texto;
 
-  // ENVIA PRO FIREBASE
   salvarChamado({
-    setor: setorAtual,
+    setor:    setorAtual,
     atendente: atendenteAtual,
-    demanda:   demandaAtual.nome,
-    titulo: demandaAtual.nome,
-    subtipo: subAtual.sub,
-    texto: texto, 
+    demanda:  demandaAtual.nome,
+    titulo:   demandaAtual.nome,
+    subtipo:  subAtual.sub,
+    texto:    texto,
   });
 
   document.getElementById('output-box').style.display = 'block';
 }
 
+// =========================
 //  COPIAR TEXTO
 // =========================
 function copiar() {
