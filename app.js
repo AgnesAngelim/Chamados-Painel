@@ -609,19 +609,30 @@ function gerarTexto() {
     }
   });
 
+  // Lê campos extras (ex: Nome Contel, CPF Contel, etc.)
+  let extrasTexto = '';
+  if (subAtual.extras && subAtual.extras.length > 0) {
+    subAtual.extras.forEach(e => {
+      const val = document.getElementById(e.id)?.value.trim() || '';
+      if (val) extrasTexto += `\n${e.label}: ${val}`;
+    });
+  }
+
   let texto;
   if (isTransferencia) {
     texto  = `${demandaAtual.nome} - ID licenciado: ${idLicenciado}\n`;
     texto += `Atendente: ${atendenteAtual}\n`;
     texto += `Corrigir: ${subAtual.sub}\n`;
-    texto += `${modelo}\n`;
-    texto += `ID licenciado: ${idLicenciado}`;
+    texto += `${modelo}`;
+    if (extrasTexto) texto += extrasTexto;
+    texto += `\nID licenciado: ${idLicenciado}`;
   } else {
     texto  = `${demandaAtual.nome} - ID cliente: ${idCliente}\n`;
     texto += `Atendente: ${atendenteAtual}\n`;
     texto += `Corrigir: ${subAtual.sub}\n`;
-    texto += `${modelo}\n`;
-    texto += `ID cliente: ${idCliente}\n`;
+    texto += `${modelo}`;
+    if (extrasTexto) texto += extrasTexto;
+    texto += `\nID cliente: ${idCliente}\n`;
     texto += `ID licenciado: ${idLicenciado}`;
   }
 
