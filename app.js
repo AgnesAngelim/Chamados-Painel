@@ -634,18 +634,20 @@ function gerarTexto() {
     if (extrasTexto) texto += extrasTexto;
     texto += `\nID cliente: ${idCliente}\n`;
     texto += `ID licenciado: ${idLicenciado}`;
+    texto += `\nEmail: Maycon.alef@igreenenergy.com.br`;
   }
 
   document.getElementById('output-text').textContent = texto;
 
   salvarChamado({
-    setor:    setorAtual,
-    atendente: atendenteAtual,
-    demanda:  demandaAtual.nome,
-    titulo:   demandaAtual.nome,
-    subtipo:  subAtual.sub,
-    texto:    texto,
-  });
+  setor:    setorAtual,
+  atendente: atendenteAtual,
+  demanda:  demandaAtual.nome,
+  titulo:   demandaAtual.nome,
+  subtipo:  subAtual.sub,
+  texto:    texto,
+  email: "Maycon.alef@igreenenergy.com.br"
+});
 
   document.getElementById('output-box').style.display = 'block';
 }
