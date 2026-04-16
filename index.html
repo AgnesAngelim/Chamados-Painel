@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Script de Chamados</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="container">
+    
+    <!-- HEADER -->
+    <header>
+      <div class="logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 16 16">
+            <path d="M2 4h12M2 8h8M2 12h10" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h1>Script de Chamados</h1>
+      </div>
+      <p class="tagline">Selecione o setor, a demanda e preencha os dados.</p>
+    </header>
+
+    <!-- SETOR -->
+    <div class="step-wrap">
+      <p class="step-label">01 — Setor</p>
+      <div class="chip-group">
+        <button class="chip" onclick="selecionarSetor('green', this)">Green</button>
+        <button class="chip" onclick="selecionarSetor('telecom', this)">Telecom</button>
+        <button class="chip" onclick="selecionarSetor('expansao', this)">Expansão</button>
+      </div>
+    </div>
+
+    <!-- ATENDENTE -->
+    <div id="passo-atendente" class="step-wrap hidden">
+      <p class="step-label">02 — Atendente</p>
+      <div class="chip-group" id="atendente-list"></div>
+    </div>
+
+    <!-- DEMANDA -->
+    <div id="passo2" class="step-wrap hidden">
+      <p class="step-label">03 — Demanda</p>
+      <div class="demanda-grid" id="demanda-list"></div>
+    </div>
+
+    <!-- SUBTIPO -->
+    <div id="passo3" class="step-wrap hidden">
+      <p class="step-label">04 — Subtipo</p>
+      <div class="sub-grid" id="sub-list"></div>
+    </div>
+
+    <!-- FORM -->
+    <div id="passo4" class="hidden">
+      <div class="divider"></div>
+
+      <div class="form-card">
+        <div class="form-titulo" id="titulo-box"></div>
+        <div class="form-subtitulo" id="subtitulo-box"></div>
+
+        <div class="modelo-box" id="modelo-wrap"></div>
+        <div id="campos-extras"></div>
+
+        <div class="fields-row">
+          <div class="field-group">
+            <label class="field-label">ID cliente</label>
+            <input type="text" class="field-input" id="id-cliente" placeholder="Ex: 123456" oninput="idClienteSalvo = this.value" />
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">ID licenciado</label>
+            <input type="text" class="field-input" id="id-licenciado" placeholder="Ex: 123456" oninput="idLicenciadoSalvo = this.value" />
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-gerar" onclick="gerarTexto()">Gerar chamado</button>
+    </div>
+
+    <!-- RESULTADO -->
+    <div class="output-card" id="output-box" style="display:none;">
+      <div class="output-header">
+        <span class="output-tag">Chamado gerado</span>
+
+        <button class="btn-copy" id="btn-copy" onclick="copiar()">
+          Copiar texto
+        </button>
+      </div>
+
+      <div class="output-text" id="output-text"></div>
+    </div>
+
+  </div>
+
+  <!-- LINK PAINEL -->
+  <div style="text-align:center; padding: 20px 0 0; display:flex; flex-direction:column; align-items:center; gap:8px;">
+  <a href="painel-green.html" style="font-size:11px; color: var(--text3); text-decoration:none; opacity:0.4;">Analista Green</a>
+  <a href="painel-telecom.html" style="font-size:11px; color: var(--text3); text-decoration:none; opacity:0.4;">Analista Telecom</a>
+  <a href="painel-expansao.html" style="font-size:11px; color: var(--text3); text-decoration:none; opacity:0.4;">Analista Expansão</a>
+  
+  <!-- FIREBASE  -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+  <!-- SEU JS -->
+  <script src="app.js"></script>
+
+</body>
+</html>
