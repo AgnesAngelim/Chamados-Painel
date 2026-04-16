@@ -1,4 +1,3 @@
-// =========================
 // CONFIGURAÇÃO ÚNICA DO FIREBASE
 // =========================
 const firebaseConfig = {
