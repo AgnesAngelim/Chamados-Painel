@@ -633,9 +633,13 @@ function gerarTexto() {
     if (extrasTexto) texto += extrasTexto;
     texto += `\nID cliente: ${idCliente}\n`;
     texto += `ID licenciado: ${idLicenciado}`;
-    texto += `\nEmail: Maycon.alef@igreenenergy.com.br`;
   }
-
+  const emails = {
+    green: 'matheusurias@igreenenergy.com.br',
+    telecom: 'Maycon.alef@igreenenergy.com.br',
+    expansao: 'mateuskeveny@igreenenergy.com.br'
+  };
+  texto += `\nEmail: ${emails[setorAtual] || ''}`;
   document.getElementById('output-text').textContent = texto;
 
   salvarChamado({
