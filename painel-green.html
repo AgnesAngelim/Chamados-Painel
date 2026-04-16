@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Painel Analista — Green</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐋</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="painel.css" />
@@ -346,8 +345,13 @@
         <div class="stat-card"><div class="stat-label">Esta semana</div><div class="stat-value" id="stat-semana">0</div></div>
         <div class="stat-card"><div class="stat-label">Este mês</div><div class="stat-value" id="stat-mes">0</div></div>
       </div>
-
-      <div class="colaboradores-wrap" id="colaboradores-wrap" style="margin-bottom:12px;">
+      <div class="filtros-row" style="margin-bottom:12px;">
+        <div class="chip-group">
+          <button class="chip active" onclick="filtrar('todos', this)">Todos</button>
+          <button class="chip" onclick="filtrar('green', this)">Green</button>
+        </div>
+      </div>
+      <div class="colaboradores-wrap" id="colaboradores-wrap" style="display:none; margin-bottom:12px;">
         <div id="lista-colaboradores" class="colaboradores-list"></div>
       </div>
       <div class="filtros-row">
@@ -370,17 +374,13 @@
 
     <!-- ========== ABA DASHBOARD ========== -->
     <div id="tela-dashboard" class="hidden">
-  <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:24px;">
-    <button class="chip-data active" onclick="filtrarPeriodoDash('mes', this)">Este mês</button>
-    <button class="chip-data" onclick="filtrarPeriodoDash('ano', this)">Este ano</button>
-    <button class="chip-data" onclick="filtrarPeriodoDash('personalizado', this)">Personalizado</button>
-    <div id="filtro-personalizado" style="display:none; gap:8px; align-items:center; flex-wrap:wrap;">
-      <input type="date" id="data-inicio" style="padding:6px 10px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-family:var(--sans); font-size:12px; outline:none;" onchange="renderizarDashboard()" />
-      <span style="color:var(--text3); font-size:12px;">até</span>
-      <input type="date" id="data-fim" style="padding:6px 10px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-family:var(--sans); font-size:12px; outline:none;" onchange="renderizarDashboard()" />
-    </div>
-  </div>
-  <div class="dash-grid">
+      <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:24px;">
+        <div class="chip-group" id="filtro-setor-dash">
+          <button class="chip active" onclick="filtrarSetorDash('todos', this)">Todos</button>
+          <button class="chip" onclick="filtrarSetorDash('green', this)">Green</button>
+        </div>
+      </div>
+      <div class="dash-grid">
         <div class="dash-card dash-wide">
           <div class="dash-card-title">Chamados por atendente</div>
           <div class="dash-chart-wrap"><canvas id="grafico-atendente"></canvas></div>
@@ -422,9 +422,7 @@
         <button class="btn-add-demanda" onclick="adicionarDemanda()">+ Nova demanda</button>
       </div>
     </div>
-<div style="text-align:center; padding: 40px 0 0; font-size:11px; color: var(--text3); opacity:0.4;">
-  feito por: Agnes Angelim
-</div>
+
   </div>
 </div>
 
@@ -676,13 +674,23 @@ function renderizarEditor() {
       </div>`;
     lista.appendChild(card);
   });
+
+  cardsAbertos.forEach(id => {
+    const body = document.getElementById('body-ed-' + id);
+    const seta = document.getElementById('seta-ed-' + id);
+    if (body) { body.classList.remove('hidden'); seta.textContent = '▾'; }
+  });
 }
+
+const cardsAbertos = new Set();
 
 function toggleEditorCard(id) {
   const body = document.getElementById('body-ed-' + id);
   const seta = document.getElementById('seta-ed-' + id);
   const hidden = body.classList.toggle('hidden');
   seta.textContent = hidden ? '▸' : '▾';
+  if (hidden) cardsAbertos.delete(id);
+  else cardsAbertos.add(id);
 }
 
 function adicionarDemanda() {
@@ -741,7 +749,7 @@ function atualizarStats() {
   const inicioSemana = new Date(hoje); inicioSemana.setDate(hoje.getDate() - hoje.getDay());
   const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
   const parsarData = str => { if (!str) return null; const [date,time] = str.split(', '); const [d,m,y] = date.split('/'); return new Date(`${y}-${m}-${d}T${time||'00:00:00'}`); };
-  const filtrados = chamados.filter(c => c.setor === SETOR);
+  const filtrados = chamados.filter(c => c.setor === SETOR || filtroSetor === 'todos');
   document.getElementById('stat-total').textContent  = filtrados.length;
   document.getElementById('stat-hoje').textContent   = filtrados.filter(c => c.data && c.data.startsWith(dHoje)).length;
   document.getElementById('stat-semana').textContent = filtrados.filter(c => { const d=parsarData(c.data); return d&&d>=inicioSemana; }).length;
@@ -888,17 +896,6 @@ function exportarCSV() {
   const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`chamados_green_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.csv`; a.click();
 }
 
-let periodoDash = 'mes';
-
-function filtrarPeriodoDash(periodo, btn) {
-  periodoDash = periodo;
-  document.querySelectorAll('#tela-dashboard .chip-data').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const personalizado = document.getElementById('filtro-personalizado');
-  personalizado.style.display = periodo === 'personalizado' ? 'flex' : 'none';
-  if (periodo !== 'personalizado') renderizarDashboard();
-}
-
 // ══════════════════════════════════════════════════════
 //  DASHBOARD
 // ══════════════════════════════════════════════════════
@@ -909,20 +906,8 @@ function filtrarSetorDash(setor, btn) {
 }
 
 function renderizarDashboard() {
-const hoje = new Date();
-const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-const inicioAno = new Date(hoje.getFullYear(), 0, 1);
-const parsarData = str => { if (!str) return null; const [date,time]=str.split(', '); const [d,m,y]=date.split('/'); return new Date(`${y}-${m}-${d}T${time||'00:00:00'}`); };
-
-let dados = chamados.filter(c => c.setor === SETOR);
-if (periodoDash === 'mes') dados = dados.filter(c => { const d=parsarData(c.data); return d&&d>=inicioMes; });
-if (periodoDash === 'ano') dados = dados.filter(c => { const d=parsarData(c.data); return d&&d>=inicioAno; });
-if (periodoDash === 'personalizado') {
-  const ini = document.getElementById('data-inicio')?.value;
-  const fim = document.getElementById('data-fim')?.value;
-  if (ini) dados = dados.filter(c => { const d=parsarData(c.data); return d&&d>=new Date(ini); });
-  if (fim) dados = dados.filter(c => { const d=parsarData(c.data); return d&&d<=new Date(fim+'T23:59:59'); });
-}const cores = ['#10B981','#06B6D4','#F59E0B','#EF4444','#8B5CF6','#EC4899','#14B8A6','#F97316','#6366F1','#84CC16'];
+  const dados = chamados.filter(c => c.setor === SETOR);
+  const cores = ['#10B981','#34D399','#6EE7B7','#A7F3D0','#059669','#047857'];
 
   const contagemAtendente = {};
   dados.forEach(c => { contagemAtendente[c.atendente||'N/A'] = (contagemAtendente[c.atendente||'N/A']||0)+1; });
@@ -933,13 +918,14 @@ if (periodoDash === 'personalizado') {
     options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales: { x:{ticks:{color:'#94A3B8'},grid:{display:false}}, y:{ticks:{color:'#94A3B8',stepSize:1},grid:{color:'#1e293b'},beginAtZero:true} } }
   });
 
-const contagemDemanda = {};
-dados.forEach(c => { contagemDemanda[c.demanda||'N/A'] = (contagemDemanda[c.demanda||'N/A']||0)+1; });
-const contagemDemandaOrdenado = Object.fromEntries(Object.entries(contagemDemanda).sort((a,b) => b[1]-a[1]));  if (grafDemanda) grafDemanda.destroy();
+  const contagemDemanda = {};
+  dados.forEach(c => { contagemDemanda[c.demanda||'N/A'] = (contagemDemanda[c.demanda||'N/A']||0)+1; });
+  if (grafDemanda) grafDemanda.destroy();
   grafDemanda = new Chart(document.getElementById('grafico-demanda'), {
-    type: 'bar',
-    data: { labels: Object.keys(contagemDemandaOrdenado), datasets: [{ data: Object.values(contagemDemandaOrdenado), backgroundColor: cores, borderColor: '#020617' }] },
-    options: { indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{ticks:{color:'#94A3B8',stepSize:1},grid:{color:'#1e293b'},beginAtZero:true}, y:{ticks:{color:'#94A3B8',font:{size:11}},grid:{display:false}} } }  });
+    type: 'doughnut',
+    data: { labels: Object.keys(contagemDemanda), datasets: [{ data: Object.values(contagemDemanda), backgroundColor: cores, borderColor: '#020617' }] },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{color:'#94A3B8',font:{size:11},padding:12}}} }
+  });
 
   const ranking = document.getElementById('ranking-lista'); ranking.innerHTML = '';
   const sorted = Object.entries(contagemAtendente).sort((a,b)=>b[1]-a[1]); const max = sorted[0]?.[1]||1;
@@ -953,7 +939,8 @@ const contagemDemandaOrdenado = Object.fromEntries(Object.entries(contagemDemand
   grafLinha = new Chart(document.getElementById('grafico-linha'), {
     type: 'line',
     data: { labels: diasOrdenados, datasets: atendentesLinha.map((nome,i)=>({ label:nome, data:diasOrdenados.map(dia=>diasMap[dia]?.[nome]||0), borderColor:cores[i%cores.length], backgroundColor:cores[i%cores.length]+'22', borderWidth:2, pointRadius:4, tension:0.3, fill:false })) },
-options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{color:'#94A3B8',font:{size:11},padding:12,boxWidth:12}}}, scales:{x:{ticks:{color:'#94A3B8',font:{size:10}},grid:{color:'#1e293b'}}, y:{ticks:{color:'#94A3B8',stepSize:1},grid:{color:'#1e293b'},beginAtZero:true}}, elements:{line:{tension:0.4},point:{radius:3,hoverRadius:6}} }  });
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{color:'#94A3B8',font:{size:11},padding:12}}}, scales:{x:{ticks:{color:'#94A3B8'},grid:{color:'#1e293b'}},y:{ticks:{color:'#94A3B8',stepSize:1},grid:{color:'#1e293b'},beginAtZero:true}} }
+  });
 }
 
 // ══════════════════════════════════════════════════════
