@@ -520,7 +520,6 @@ function renderizarChamados() {
         <div class="chamado-info">
           <div class="chamado-titulo">
             ${esc(c.demanda||'Chamado')}
-            <span class="badge-id">#${c.id.slice(-6)}</span>
             <span class="badge-setor badge-${c.setor||'expansao'}">${c.setor||'expansao'}</span>
           </div>
           <div class="chamado-meta">
