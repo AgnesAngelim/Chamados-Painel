@@ -89,7 +89,7 @@
         </div>
       </div>
       <div class="painel-header-actions">
-        <button class="btn-tema" onclick="alternarTema()" id="btn-tema" title="Alternar tema">☀️</button>
+        <button class="btn-tema" onclick="alternarTema()" id="btn-tema" title="Alternar tema">🌙</button>
         <button class="btn-limpar" onclick="confirmarLimpar()">Limpar todos</button>
         <button class="btn-exportar" onclick="exportarCSV()">Exportar CSV</button>
         <button class="btn-sair" onclick="sair()">Sair</button>
@@ -259,7 +259,7 @@ function alternarTema() {
   const html = document.documentElement, btn = document.getElementById('btn-tema');
   const escuro = html.getAttribute('data-tema') === 'escuro';
   html.setAttribute('data-tema', escuro ? 'claro' : 'escuro');
-  btn.textContent = escuro ? '🌑' : '🐋';
+  btn.textContent = escuro ? '🌑' : '🌙';
   const v = escuro
     ? { bg:'#f8fafc', surface:'#ffffff', surface2:'#f1f5f9', border:'#e2e8f0', border2:'#cbd5e1', text:'#0f172a', text2:'#334155', text3:'#64748b' }
     : { bg:'#020617', surface:'#1E293B', surface2:'#334155', border:'#334155', border2:'#475569', text:'#FFFFFF', text2:'#CBD5E1', text3:'#94A3B8' };
