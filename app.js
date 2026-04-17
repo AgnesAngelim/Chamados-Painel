@@ -262,7 +262,6 @@ function gerarTexto() {
 
   if (idCliente)    texto += `\nID cliente: ${idCliente}`;
   if (idLicenciado) texto += `\nID licenciado: ${idLicenciado}`;
-  texto += `\nEmail: Maycon.alef@igreenenergy.com.br`;
 
   document.getElementById('output-text').textContent = texto;
 
@@ -275,7 +274,6 @@ function gerarTexto() {
     subtipo: subAtual.sub,
     texto: texto,
     data: new Date().toLocaleString('pt-BR'),
-    email: "Maycon.alef@igreenenergy.com.br"
   }).catch(err => console.error('Erro ao salvar:', err));
 
   document.getElementById('output-box').style.display = 'block';
