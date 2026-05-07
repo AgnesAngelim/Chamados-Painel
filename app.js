@@ -1,6 +1,4 @@
-// =========================
 // CONFIGURAÇÃO DO FIREBASE
-// =========================
 const firebaseConfig = {
   apiKey: "AIzaSyBlbavbldOZuw3_lerPFzP0TDHK9K5Sqeg",
   authDomain: "chamados-7e9e0.firebaseapp.com",
@@ -12,9 +10,7 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// =========================
 // ESTADO GLOBAL
-// =========================
 let atendenteAtual = '';
 let setorAtual = '';
 let demandaAtual = null;
@@ -25,9 +21,7 @@ let idLicenciadoSalvo = '';
 // Scripts carregados dinamicamente do Firebase
 let scriptsCarregados = {};
 
-// =========================
 // CARREGAR SCRIPTS DO FIREBASE
-// =========================
 async function carregarScriptsSetor(setor) {
   const doc = await db.collection('scripts').doc(setor).get();
   if (doc.exists) {
@@ -36,9 +30,7 @@ async function carregarScriptsSetor(setor) {
   return null;
 }
 
-// =========================
 // SELECIONAR SETOR
-// =========================
 async function selecionarSetor(setor, btn) {
   setorAtual = setor;
 
@@ -87,9 +79,7 @@ async function selecionarSetor(setor, btn) {
   document.getElementById('passo-atendente').classList.remove('hidden');
 }
 
-// =========================
 // MOSTRAR DEMANDAS
-// =========================
 function mostrarDemandas() {
   const lista = document.getElementById('demanda-list');
   lista.innerHTML = '';
@@ -112,9 +102,7 @@ function mostrarDemandas() {
   document.getElementById('passo2').classList.remove('hidden');
 }
 
-// =========================
 // SELECIONAR DEMANDA
-// =========================
 function selecionarDemanda(d, btn) {
   demandaAtual = d;
 
@@ -138,9 +126,7 @@ function selecionarDemanda(d, btn) {
   document.getElementById('passo3').classList.remove('hidden');
 }
 
-// =========================
 // SELECIONAR SUB
-// =========================
 function selecionarSub(s, btn) {
   subAtual = s;
 
@@ -201,9 +187,7 @@ function selecionarSub(s, btn) {
   document.getElementById('passo4').classList.remove('hidden');
 }
 
-// =========================
 // GERAR TEXTO + SALVAR
-// =========================
 function gerarTexto() {
   if (!subAtual) return;
 
@@ -262,6 +246,10 @@ function gerarTexto() {
 
   if (idCliente)    texto += `\nID cliente: ${idCliente}`;
   if (idLicenciado) texto += `\nID licenciado: ${idLicenciado}`;
+   const emails = {
+    telecom: 'maycon.alef@igreenenergy.com.br',
+  };
+  texto += `\nEmail: ${emails[setorAtual] || ''}`;
 
   document.getElementById('output-text').textContent = texto;
 
@@ -279,9 +267,7 @@ function gerarTexto() {
   document.getElementById('output-box').style.display = 'block';
 }
 
-// =========================
 // COPIAR TEXTO
-// =========================
 function copiar() {
   const texto = document.getElementById('output-text').textContent;
   const btn = document.getElementById('btn-copy');
